@@ -28,11 +28,13 @@ class MainActivity : AppCompatActivity() {
             if(scrollView.scrollY > 150f.dpToPx()) {
                 if(alreadyAnimation.not()) {
                     motionLayout.transitionToEnd()
+                    wholeMotion.transitionToEnd()
                 }
             }
             else {
                 if(alreadyAnimation.not()) {
                     motionLayout.transitionToStart()
+                    wholeMotion.transitionToStart()
                 }
             }
         }
