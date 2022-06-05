@@ -13,7 +13,9 @@ import android.view.WindowManager
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.appbar.AppBarLayout
 import kong.droid.motionexample.databinding.ActivityMainBinding
+import java.lang.Math.abs
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -26,28 +28,46 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         makeStatusTrans()
-        initActionBar()
+        initAppBar()
         initInset()
         initView()
     }
 
-    fun initInset()= with(binding) {
-        ViewCompat.setOnApplyWindowInsetsListener(coordinator){ v:View, insets: WindowInsetsCompat ->
+    fun initInset() = with(binding) {
+        ViewCompat.setOnApplyWindowInsetsListener(coordinator) { v: View, insets: WindowInsetsCompat ->
             val params = v.layoutParams as ViewGroup.MarginLayoutParams
             params.bottomMargin = insets.systemWindowInsetBottom
-            toolbarContainer.layoutParams = (toolbarContainer.layoutParams as ViewGroup.MarginLayoutParams).apply {
-                setMargins(0,insets.systemWindowInsetTop,0,0)
-            }
-            collapsiongTool.layoutParams= (collapsiongTool.layoutParams as ViewGroup.MarginLayoutParams).apply {
-                setMargins(0,0,0,0)
-            }
+            toolbarContainer.layoutParams =
+                (toolbarContainer.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                    setMargins(0, insets.systemWindowInsetTop, 0, 0)
+                }
+            collapsiongTool.layoutParams =
+                (collapsiongTool.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                    setMargins(0, 0, 0, 0)
+                }
             insets.consumeSystemWindowInsets()
         }
     }
 
-    fun initActionBar() = with(binding){
+    fun initAppBar() = with(binding) {
+        appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { layout, offset ->
+            val topPadding = 120f.dpToPx()
+            var verticalOffset = abs(offset)
+            if (topPadding > verticalOffset) {
+                toolbarBackgroundView.alpha = 0f
+                return@OnOffsetChangedListener
+            }
+            val margin = verticalOffset - topPadding
+            val percentage = abs(margin) / layout.totalScrollRange
+            toolbarBackgroundView.alpha =
+                1 - (if (1 - percentage * 2 < 0) 0f else 1 - percentage * 2)
+        })
+        initActionBar()
+    }
+
+    fun initActionBar() = with(binding) {
         toolbar.navigationIcon = null
-        toolbar.setContentInsetsAbsolute(0,0)
+        toolbar.setContentInsetsAbsolute(0, 0)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.let {
             it.setHomeButtonEnabled(false)
